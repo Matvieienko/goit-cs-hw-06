@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: web_app
+    ports:
+      - "3000:3000"
+      - "5000:5000"
+    depends_on:
+      mongodb:
+        condition: service_healthy  # Очікує, доки MongoDB буде готовий
+    volumes:
+      - .:/app
+    restart: always
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  mongo_data:
